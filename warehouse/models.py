@@ -5,6 +5,9 @@ from django.core.exceptions import ValidationError
 
 
 class Owner(models.Model):
+    """
+    Class Owner contain information about owner of something (item etc.)
+    """
     name = models.CharField(max_length=255, blank=False, unique=True)
     description = models.TextField(blank=True)
 
@@ -12,20 +15,29 @@ class Owner(models.Model):
         return self.name
 
 class Location(models.Model):
+    """
+    Physical or abstract location of Item (warehouse room, assembly of prototype etc.)
+    """
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
-    # посилання на свій же клас дозволяє зробити гнучку структуру фізичного розташування
+    # посилання на свій же клас ('self') дозволяє зробити гнучку структуру розташування item
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
 class Supplier(models.Model):
+    """
+    Class Supplier contain information about supplier of something (item etc.)
+    """
     name = models.CharField(max_length=255, blank=False)
     link = models.URLField(blank=True)
 
     def normalize_name(self):
-        # зберігаємо тільки Upper щоб уникнути дублювання даних
+        """
+        Зберігаємо тільки Upper щоб уникнути дублювання даних. Поки не працює, тому що коли створюємо
+        новий запис "бублик", django не проводить валідацію на перевірку, чи існує "БУБЛИК", бо шукає саме "бублик"
+        """
         self.name = self.name.lower()
 
     def save(self, *args, **kwargs):
