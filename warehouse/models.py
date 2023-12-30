@@ -66,6 +66,8 @@ class Item(models.Model):
     name = models.CharField(max_length=255, unique=True)
     category = models.ForeignKey(ItemCategory, on_delete=models.SET_NULL, blank=True, null=True)
     attributes = models.ManyToManyField(Attribute, blank=True)
+    photo = models.ImageField(upload_to='item_images/', blank=True, null=True)
+
 
     def __str__(self):
         return self.name
