@@ -150,8 +150,14 @@ class ItemAdmin(admin.ModelAdmin):
     #         return format_html('<img src="{}"/>'.format(obj.image.url))
     #     else:
     #         return "No Photo"
-    list_display = ('name', 'id', 'image', 'img_preview')
-    readonly_fields = ('img_preview',)
+    list_display = ('name', 'id', 'image', 'thumbnail_preview')
+    readonly_fields = ('thumbnail_preview',)
+
+    def thumbnail_preview(self, obj):
+        return obj.thumbnail_preview
+
+    thumbnail_preview.short_description = 'Thumbnail Preview'
+    thumbnail_preview.allow_tags = True
 
     # def image_tag(self, obj):
     #     if obj.image:
@@ -162,8 +168,6 @@ class ItemAdmin(admin.ModelAdmin):
     #      ))
     #     else:
     #         return "No Photo"
-
-
 
 
     # def display_photo(self, obj):
