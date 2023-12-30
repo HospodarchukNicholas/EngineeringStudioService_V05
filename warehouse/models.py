@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.html import format_html, mark_safe
 
 
 
@@ -66,8 +67,18 @@ class Item(models.Model):
     name = models.CharField(max_length=255, unique=True)
     category = models.ForeignKey(ItemCategory, on_delete=models.SET_NULL, blank=True, null=True)
     attributes = models.ManyToManyField(Attribute, blank=True)
-    photo = models.ImageField(upload_to='item_images/', blank=True, null=True)
+    image = models.ImageField(upload_to='item_images',)
 
+    def img_preview(self):
+        if self.image:
+            url = self.image.url
+            # url = "C:/Users/Satellite/PycharmProjects/ESS_V05/EngineeringStudioService_V05/media/item_images/_1029525.JPG"
+            return format_html(f'<img src="{url}" width="300" height="300" />')
+        else:
+            return 'No img'
+
+    # img_preview.allow_tags = True
+    # img_preview.short_description = 'Photo Preview'
 
     def __str__(self):
         return self.name

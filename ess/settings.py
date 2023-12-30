@@ -23,6 +23,7 @@ SECRET_KEY = 'django-insecure-pv*)scm=bp2bnjp7+y06*+3*5#s^er*q0ytins$!37c7#cgyd(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+# DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -119,4 +120,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Default location of user-uploaded media files
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = BASE_DIR / 'media'

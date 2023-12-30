@@ -1,9 +1,14 @@
 from django.contrib import admin
 from .models import *
+from django.utils.html import format_html, mark_safe
 from .forms import *
+import os
+from pathlib import Path
 
-admin.site.site_header = 'DefirWarehouse_v0.3'
-admin.site.site_title = 'DefirWarehouse_v0.3'
+VERSION = 'v0.5'
+COMPANY_NAME = 'Defir'
+admin.site.site_header = f'{COMPANY_NAME} Warehouse {VERSION}'
+admin.site.site_title = f'{COMPANY_NAME} Warehouse {VERSION}'
 
 
 @admin.register(Attribute)
@@ -136,6 +141,39 @@ class ItemLocationAdmin(admin.ModelAdmin):
     search_fields = ['item', 'location']
 
 
-@admin.register(Item)
+
+
 class ItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'id',)
+
+    # def image_tag(self, obj):
+    #     if obj.image:
+    #         return format_html('<img src="{}"/>'.format(obj.image.url))
+    #     else:
+    #         return "No Photo"
+    list_display = ('name', 'id', 'image', 'img_preview')
+    readonly_fields = ('img_preview',)
+
+    # def image_tag(self, obj):
+    #     if obj.image:
+    #         return mark_safe('<img src = "{url}" witdh = "{width}" height="{height}"/>'.format(
+    #          url = obj.image.url,
+    #          width = obj.image.width,
+    #          height = obj.image.height
+    #      ))
+    #     else:
+    #         return "No Photo"
+
+
+
+
+    # def display_photo(self, obj):
+    #     if obj.photo:
+    #         return format_html('<img src="{}" width="50" height="50" />', obj.photo.url)
+    #     else:
+    #         return "No Photo"
+
+    # def display_photo(self, obj):
+    #     return format_html('<img src="{}" width="50" height="50" />', obj.photo.url)
+
+    # image_tag.short_description = 'Photo Preview'
+admin.site.register(Item, ItemAdmin)

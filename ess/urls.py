@@ -26,3 +26,5 @@ urlpatterns = [
 
 # This extends the existing urlpatterns list with additional URL patterns specified by the static() function
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
