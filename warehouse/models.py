@@ -5,7 +5,12 @@ from django.utils.html import format_html, mark_safe
 from sorl.thumbnail import get_thumbnail
 from django.utils.html import format_html
 
+class ItemCategory(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
 
 class Owner(models.Model):
     """
@@ -50,12 +55,7 @@ class Supplier(models.Model):
     def __str__(self):
         return self.name
 
-class ItemCategory(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.name
 
 class Attribute(models.Model):
     # для моделі GeneralItem створюємо необмежену зількість додаткових полів
@@ -69,32 +69,11 @@ class Item(models.Model):
     name = models.CharField(max_length=255, unique=True)
     category = models.ForeignKey(ItemCategory, on_delete=models.SET_NULL, blank=True, null=True)
     attributes = models.ManyToManyField(Attribute, blank=True)
-    image = models.ImageField(upload_to='item_images', null=True, blank=True)
-
-    @property
-    def thumbnail_preview(self):
-        if self.image:
-            _thumbnail = get_thumbnail(self.image,
-                                       '300x300',
-                                       upscale=False,
-                                       crop=False,
-                                       quality=100)
-            return format_html(
-                '<img src="{}" width="{}" height="{}">'.format(_thumbnail.url, _thumbnail.width, _thumbnail.height))
-        return ""
-
-    # def img_preview(self):
-    #     if self.image:
-    #
-    #         return format_html(f'<img src="{self.image.url}" width="300" height="300" />')
-    #     else:
-    #         return 'No img'
-
-    # img_preview.allow_tags = True
-    # img_preview.short_description = 'Photo Preview'
+    image = models.ImageField(upload_to='item_images/', blank=True, null=True)
 
     def __str__(self):
         return self.name
+
 
 class Tool(Item):
     description = models.CharField(max_length=255, unique=True)

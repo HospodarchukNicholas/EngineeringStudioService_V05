@@ -141,43 +141,38 @@ class ItemLocationAdmin(admin.ModelAdmin):
     search_fields = ['item', 'location']
 
 
-
-
 class ItemAdmin(admin.ModelAdmin):
+    """
+    Custom Admin class for managing Item objects in the Django admin interface.
 
-    # def image_tag(self, obj):
-    #     if obj.image:
-    #         return format_html('<img src="{}"/>'.format(obj.image.url))
-    #     else:
-    #         return "No Photo"
-    list_display = ('name', 'id', 'image', 'thumbnail_preview')
-    readonly_fields = ('thumbnail_preview',)
+    This class includes a custom method 'image_tag' to display an HTML image tag
+    for the 'image' field, providing a preview in the list view.
 
-    def thumbnail_preview(self, obj):
-        return obj.thumbnail_preview
+    """
 
-    thumbnail_preview.short_description = 'Thumbnail Preview'
-    thumbnail_preview.allow_tags = True
+    def image_tag(self, obj):
+        """
+        Custom method to generate an HTML image tag for the 'image' field in the Django admin.
 
-    # def image_tag(self, obj):
-    #     if obj.image:
-    #         return mark_safe('<img src = "{url}" witdh = "{width}" height="{height}"/>'.format(
-    #          url = obj.image.url,
-    #          width = obj.image.width,
-    #          height = obj.image.height
-    #      ))
-    #     else:
-    #         return "No Photo"
+        Args:
+            obj: The Item object.
+
+        Returns:
+            str: An HTML image tag with a fixed width and automatic height.
+                 If the object has no image, 'No preview image available' is displayed.
+        """
+        if obj.image:
+            image_width = 250  # Set the desired width for the image
+            return format_html('<img src="{}" width="{}" height="auto"/>'.format(obj.image.url, image_width))
+        else:
+            return 'No preview image available'
+
+    list_display = ('name', 'category', 'image_tag', 'id',)
+    readonly_fields = ('image_tag',)
+
+    # Define a short description for the image_tag attribute
+    image_tag.short_description = 'Preview image'
+    image_tag.allow_tags = True
 
 
-    # def display_photo(self, obj):
-    #     if obj.photo:
-    #         return format_html('<img src="{}" width="50" height="50" />', obj.photo.url)
-    #     else:
-    #         return "No Photo"
-
-    # def display_photo(self, obj):
-    #     return format_html('<img src="{}" width="50" height="50" />', obj.photo.url)
-
-    # image_tag.short_description = 'Photo Preview'
 admin.site.register(Item, ItemAdmin)
