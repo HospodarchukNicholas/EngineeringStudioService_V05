@@ -124,3 +124,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Default location of user-uploaded media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# THUMBNAIL_CACHE_DIR = os.path.join(BASE_DIR, 'cache')
+# THUMBNAIL_CACHE_TIMEOUT = 60 * 60 * 24 * 7  # Set cache timeout to one week

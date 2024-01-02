@@ -5,6 +5,26 @@ from django.utils.html import format_html, mark_safe
 from sorl.thumbnail import get_thumbnail
 from django.utils.html import format_html
 
+class ImageWizard:
+
+    @staticmethod
+    def image_tag(obj, width=250):
+        """
+        Generate an HTML image tag for the 'image' field.
+
+        Args:
+            obj: The model object with an 'image' field.
+            width (int): The desired width for the image (default is 250).
+
+        Returns:
+            str: An HTML image tag with the specified width and automatic height.
+                 If the object has no image, 'No preview image available' is displayed.
+        """
+        if obj.image:
+            return format_html('<img src="{}" width="{}" height="auto"/>'.format(obj.image.url, width))
+        else:
+            return 'No preview image available'
+
 class ItemCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
@@ -55,8 +75,6 @@ class Supplier(models.Model):
     def __str__(self):
         return self.name
 
-
-
 class Attribute(models.Model):
     # для моделі GeneralItem створюємо необмежену зількість додаткових полів
     name = models.CharField(max_length=255)
@@ -74,18 +92,6 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
-
-class Tool(Item):
-    description = models.CharField(max_length=255, unique=True)
-    default_category, default_category_created = ItemCategory.objects.update_or_create(name='Tool')
-
-    def save(self, *args, **kwargs):
-        if not self.category:
-            self.category = self.default_category
-        super().save(*args, **kwargs)
-
-    # def __str__(self):
-    #     return self.name
 
 class ItemLocation(models.Model):
     # warehouse_flow = models.ForeignKey(WarehouseFlow, on_delete=models.CASCADE)

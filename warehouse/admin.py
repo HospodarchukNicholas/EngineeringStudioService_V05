@@ -1,15 +1,11 @@
 from django.contrib import admin
 from .models import *
 from django.utils.html import format_html, mark_safe
-from .forms import *
-import os
-from pathlib import Path
 
 VERSION = 'v0.5'
 COMPANY_NAME = 'Defir'
 admin.site.site_header = f'{COMPANY_NAME} Warehouse {VERSION}'
 admin.site.site_title = f'{COMPANY_NAME} Warehouse {VERSION}'
-
 
 @admin.register(Attribute)
 class AttributeAdmin(admin.ModelAdmin):
@@ -108,8 +104,6 @@ class ShoppingCartAdmin(admin.ModelAdmin):
 admin.site.register(ShoppingCart, ShoppingCartAdmin)
 
 
-# admin.site.register(ShoppingCartItem)
-
 class WriteOffItemInline(admin.StackedInline):
     model = WriteOffItem
     fields = ('item_location', 'quantity')
@@ -134,11 +128,10 @@ class WriteOffAdmin(admin.ModelAdmin):
 
 admin.site.register(WriteOff, WriteOffAdmin)
 
-
 @admin.register(ItemLocation)
 class ItemLocationAdmin(admin.ModelAdmin):
     list_display = ('item', 'location', 'quantity', 'owner', 'id')
-    search_fields = ['item', 'location']
+    search_fields = ('item', 'location', )
 
 
 class ItemAdmin(admin.ModelAdmin):
@@ -152,20 +145,16 @@ class ItemAdmin(admin.ModelAdmin):
 
     def image_tag(self, obj):
         """
-        Custom method to generate an HTML image tag for the 'image' field in the Django admin.
+        Generate an HTML image tag using the 'image_tag' method from the ImageWizard class.
 
         Args:
-            obj: The Item object.
+            obj: The model object with an 'image' field.
 
         Returns:
-            str: An HTML image tag with a fixed width and automatic height.
-                 If the object has no image, 'No preview image available' is displayed.
+            str: An HTML image tag with the specified width and automatic height.
+                         If the object has no image, 'No preview image available' is displayed.
         """
-        if obj.image:
-            image_width = 250  # Set the desired width for the image
-            return format_html('<img src="{}" width="{}" height="auto"/>'.format(obj.image.url, image_width))
-        else:
-            return 'No preview image available'
+        return ImageWizard.image_tag(obj)
 
     list_display = ('name', 'category', 'image_tag', 'id',)
     readonly_fields = ('image_tag',)
@@ -173,6 +162,5 @@ class ItemAdmin(admin.ModelAdmin):
     # Define a short description for the image_tag attribute
     image_tag.short_description = 'Preview image'
     image_tag.allow_tags = True
-
 
 admin.site.register(Item, ItemAdmin)
