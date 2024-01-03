@@ -21,7 +21,7 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', admin.site.urls), коли є це - фотки не відображаються, потрібно знайти чому
+    # path('', admin.site.urls), #коли є це - фотки не відображаються, потрібно знайти чому
 ]
 
 # This extends the existing urlpatterns list with additional URL patterns specified by the static() function
