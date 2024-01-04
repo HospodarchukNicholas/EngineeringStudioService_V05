@@ -16,8 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', admin.site.urls),
+    # path('', admin.site.urls), #коли є це - фотки не відображаються, потрібно знайти чому
 ]
+
+# This extends the existing urlpatterns list with additional URL patterns specified by the static() function
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+
