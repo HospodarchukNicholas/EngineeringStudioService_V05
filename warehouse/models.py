@@ -7,6 +7,12 @@ from .modules.constants import *
 
 class ItemCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
+
+    """
+    A ForeignKey relationship to the same model, creating a hierarchical or recursive structure.
+    The 'self' argument indicates a self-referential relationship, allowing each instance to have a parent,
+    forming a tree-like structure. The relationship is nullable and blank, allowing for instances with no parent.
+    """
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -64,9 +70,14 @@ class Supplier(models.Model):
         return self.name
 
 
+class AttributeName(models.Model):
+    name = models.CharField(max_length=255, blank=False, unique=True)
+
+    def __str__(self):
+        return self.name
+
 class Attribute(models.Model):
-    # для моделі GeneralItem створюємо необмежену зількість додаткових полів
-    name = models.CharField(max_length=255)
+    name = models.ForeignKey(AttributeName, on_delete=models.CASCADE, blank=False)
     value = models.CharField(max_length=255)
 
     def __str__(self):

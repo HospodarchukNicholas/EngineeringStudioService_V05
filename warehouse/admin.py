@@ -7,6 +7,15 @@ COMPANY_NAME = 'Defir'
 admin.site.site_header = f'{COMPANY_NAME} Warehouse {VERSION}'
 admin.site.site_title = f'{COMPANY_NAME} Warehouse {VERSION}'
 
+@admin.register(AttributeName)
+class AttributeNameAdmin(admin.ModelAdmin):
+    def get_model_perms(self, request):
+        """
+            def get_model_perms() allows you to create an admin model
+            but not display it in the admin panel. That is, it allows you to create objects from other forms
+        """
+        return {}
+
 @admin.register(Attribute)
 class AttributeAdmin(admin.ModelAdmin):
     def get_model_perms(self, request):
