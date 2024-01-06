@@ -1,11 +1,10 @@
 from django.contrib import admin
 from .models import *
 from .modules.images import *
+from .modules.constants import *
 
-VERSION = 'v0.5'
-COMPANY_NAME = 'Defir'
-admin.site.site_header = f'{COMPANY_NAME} Warehouse {VERSION}'
-admin.site.site_title = f'{COMPANY_NAME} Warehouse {VERSION}'
+admin.site.site_header = f'{DEFAULT_COMPANY_NAME} Warehouse {PROJECT_VERSION}'
+admin.site.site_title = f'{DEFAULT_COMPANY_NAME} Warehouse {PROJECT_VERSION}'
 
 @admin.register(AttributeName)
 class AttributeNameAdmin(admin.ModelAdmin):

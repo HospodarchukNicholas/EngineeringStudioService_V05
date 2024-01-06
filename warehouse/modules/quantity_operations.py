@@ -1,9 +1,11 @@
+from django.db.models import Sum
+
 class QuantityManager:
 
     @staticmethod
     def write_off(obj, outcome_quantity):
         """
-        Perform a write-off operation on the given item_location.
+        Perform a write-off operation on the given obj (model instance).
 
         Args:
             obj (ItemLocation etc.): The Model instance with quantity field.
@@ -24,5 +26,18 @@ class QuantityManager:
             return False
 
     @staticmethod
-    def add_quantity(item_location_obj, income_quantity):
+    def add_quantity(obj, income_quantity):
         pass
+
+    def get_total_quantity(obj):
+        """
+        A function to calculate the total quantity associated with a given object.
+
+        'obj': The model instance for which the total quantity is calculated.
+
+        It uses the Django ORM to query and aggregate the 'quantity' field for related items,
+        returning the sum of quantities associated with the specified object.
+        """
+
+        # метод get_total_quantity дозволяє отримати кількість всіх Item в одному місці
+        return obj.objects.filter(item=obj).aggregate(Sum('quantity'))['quantity__sum']

@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from .modules.quantity_operations import *
 from .modules.constants import *
+from .modules.populate_db import *
 
 
 class ItemCategory(models.Model):
@@ -71,12 +72,26 @@ class Supplier(models.Model):
 
 
 class AttributeName(models.Model):
+    """
+    Model representing the name of an attribute.
+    - 'name': A CharField storing the attribute name, with a maximum length of 255 characters.
+    It is required (blank=False) and must be unique across instances of AttributeName.
+    """
+
     name = models.CharField(max_length=255, blank=False, unique=True)
 
     def __str__(self):
         return self.name
 
+
 class Attribute(models.Model):
+    """
+    Model representing an attribute with a name-value pair.
+
+    - 'name': A ForeignKey relationship to AttributeName, creating a link to the name of the attribute.
+    - 'value': A CharField storing the value associated with the attribute, with a maximum length of 255 characters.
+    """
+
     name = models.ForeignKey(AttributeName, on_delete=models.CASCADE, blank=False)
     value = models.CharField(max_length=255)
 
@@ -104,9 +119,9 @@ class ItemLocation(models.Model):
     class Meta:
         unique_together = (('item', 'location', 'owner',),)
 
-    # def get_total_quantity(item):
-    #     # метод get_total_quantity дозволяє отримати кількість всіх Item в одному місці
-    #     return ItemLocation.objects.filter(item=item).aggregate(Sum('quantity'))['quantity__sum']
+    def get_total_quantity(item):
+        # метод get_total_quantity дозволяє отримати кількість всіх Item в одному місці
+        return ItemLocation.objects.filter(item=item).aggregate(Sum('quantity'))['quantity__sum']
 
     def __str__(self):
         return f'Назва: {self.item}, Розташування: {self.location}, Кількість: {self.quantity}, Власник: {self.owner}'
@@ -173,7 +188,6 @@ class ShoppingCartItem(models.Model):
         if self.cart.status == 'completed' and not self.integrated:
             # якщо ShoppingCartItem вже було інтегровано в систему, повторно це не робимо
             self.create_item_location()
-            # self.integrated = True
             ShoppingCartItem.objects.filter(pk=self.pk).update(integrated=True)
 
     def create_item_location(self):
@@ -182,7 +196,6 @@ class ShoppingCartItem(models.Model):
             owner, owner_created = Owner.objects.get_or_create(name=DEFAULT_COMPANY_NAME)
         else:
             owner = self.owner
-
         if not self.storage_place:
             location, location_created = Location.objects.update_or_create(name=DEFAULT_LOCATION)
         else:
@@ -260,39 +273,41 @@ class WriteOffItem(models.Model):
         return self.item_location.item.name
 
 
-def create_objects():
-    # автозаповнення бази даних
 
-    ItemCategory.objects.update_or_create(name='Laptop')
-    ItemCategory.objects.update_or_create(name='Mechanical')
-    ItemCategory.objects.update_or_create(name='Electrical')
-    ItemCategory.objects.update_or_create(name='Tool')
+# def create_objects():
+#     # автозаповнення бази даних
+#
+#     ItemCategory.objects.update_or_create(name='Laptop')
+#     ItemCategory.objects.update_or_create(name='Mechanical')
+#     ItemCategory.objects.update_or_create(name='Electrical')
+#     ItemCategory.objects.update_or_create(name='Tool')
+#
+#     Owner.objects.update_or_create(name='DEFIR')
+#     Owner.objects.update_or_create(name='MAP')
+#     Owner.objects.update_or_create(name='KLAKONA')
+#
+#     Location.objects.update_or_create(name='Стелаж 1')
+#     Location.objects.update_or_create(name='Стелаж 2')
+#     Location.objects.update_or_create(name='Цех')
+#     Location.objects.update_or_create(name='Офіс')
+#     Location.objects.update_or_create(name='Кладовка')
+#
+#     Supplier.objects.update_or_create(name='Metalvis')
+#     Supplier.objects.update_or_create(name='Dinmark')
+#     Supplier.objects.update_or_create(name='Rozetka')
+#     Supplier.objects.update_or_create(name='Foxtrot')
+#
+#
+# def clean_db():
+#     ItemCategory.objects.all().delete()
+#     Item.objects.all().delete()
+#     Supplier.objects.all().delete()
+#     Location.objects.all().delete()
+#     Owner.objects.all().delete()
+#     ItemCategory.objects.all().delete()
+#     ShoppingCart.objects.all().delete()
+#     ItemLocation.objects.all().delete()
 
-    Owner.objects.update_or_create(name='DEFIR')
-    Owner.objects.update_or_create(name='MAP')
-    Owner.objects.update_or_create(name='KLAKONA')
 
-    Location.objects.update_or_create(name='Стелаж 1')
-    Location.objects.update_or_create(name='Стелаж 2')
-    Location.objects.update_or_create(name='Цех')
-    Location.objects.update_or_create(name='Офіс')
-    Location.objects.update_or_create(name='Кладовка')
-
-    Supplier.objects.update_or_create(name='Metalvis')
-    Supplier.objects.update_or_create(name='Dinmark')
-    Supplier.objects.update_or_create(name='Rozetka')
-    Supplier.objects.update_or_create(name='Foxtrot')
-
-
-def clean_db():
-    ItemCategory.objects.all().delete()
-    Item.objects.all().delete()
-    Supplier.objects.all().delete()
-    Location.objects.all().delete()
-    Owner.objects.all().delete()
-    ItemCategory.objects.all().delete()
-    ShoppingCart.objects.all().delete()
-    ItemLocation.objects.all().delete()
-
-# clean_db()
 # create_objects()
+# clean_db()
