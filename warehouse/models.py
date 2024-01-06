@@ -30,7 +30,12 @@ class Location(models.Model):
     """
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
-    # посилання на свій же клас ('self') дозволяє зробити гнучку структуру розташування item
+
+    """
+    A ForeignKey relationship to the same model, creating a hierarchical or recursive structure.
+    The 'self' argument indicates a self-referential relationship, allowing each instance to have a parent,
+    forming a tree-like structure. The relationship is nullable and blank, allowing for instances with no parent.
+    """
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
