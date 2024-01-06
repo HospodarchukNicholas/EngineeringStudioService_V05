@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from .modules.quantity_operations import *
 
 
 class ItemCategory(models.Model):
@@ -225,15 +226,6 @@ class WriteOffItem(models.Model):
         if self.quantity > self.item_location.quantity:
             raise ValidationError('Quantity cannot exceed the available quantity.')
 
-    def make_write_off(self):
-        item_location = self.item_location
-        current_quantity = item_location.quantity
-        write_off_quantity = self.quantity
-        if write_off_quantity <= current_quantity:
-            quantity = current_quantity - write_off_quantity
-            item_location.quantity = quantity
-            item_location.save()
-
     def save(self, *args, **kwargs):
         # перевіряємо чи об'єкт існує
         is_update = False
@@ -241,7 +233,11 @@ class WriteOffItem(models.Model):
             is_update = True
         super(WriteOffItem, self).save(*args, **kwargs)
         if not is_update:
-            self.make_write_off()
+            success = QuantityManager.write_off(self.item_location, self.quantity)
+            if not success:
+                # дублюється перевірка, але поки можливо залишити її, щоб відловити інші можливі сценарії
+                raise ValueError('Write-off quantity exceeds available quantity')
+
 
     def __str__(self):
         return self.item_location.item.name
