@@ -158,7 +158,6 @@ class ItemAdmin(admin.ModelAdmin):
 
     list_display = ('name', 'category', 'image_tag', 'id',)
     readonly_fields = ('image_tag',)
-    list_per_page = 2  # Customize the number of items per page
 
     # Define a short description for the image_tag attribute
     image_tag.short_description = 'Preview image'
