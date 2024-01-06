@@ -175,7 +175,7 @@ class ShoppingCartItem(models.Model):
             item=item,
             owner=owner,
             location=location,
-            defaults={'quantity': 1}
+            defaults={'quantity': 0}
         )
         if item_location_created:
             item_location.quantity = quantity
