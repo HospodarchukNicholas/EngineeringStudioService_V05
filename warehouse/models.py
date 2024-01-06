@@ -200,21 +200,27 @@ class ShoppingCartItem(models.Model):
             location, location_created = Location.objects.update_or_create(name=DEFAULT_LOCATION)
         else:
             location = self.storage_place
-        quantity = self.quantity
+
         item_location, item_location_created = ItemLocation.objects.get_or_create(
             item=item,
             owner=owner,
             location=location,
             defaults={'quantity': 0}
         )
+
+        income_quantity = self.quantity
         if item_location_created:
-            item_location.quantity = quantity
+            item_location.quantity = income_quantity
             item_location.save()
         elif not item_location_created:
+            QuantityManager.add_quantity(item_location, income_quantity)
             # добавляємо якщо запис вже існує
-            quantity += item_location.quantity
-            item_location.quantity = quantity
-            item_location.save()
+
+            # quantity += item_location.quantity
+            # item_location.quantity = quantity
+            # item_location.save()
+
+
 
     def __str__(self):
         return self.name

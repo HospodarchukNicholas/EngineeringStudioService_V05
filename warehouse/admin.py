@@ -64,11 +64,20 @@ class SupplierAdmin(admin.ModelAdmin):
 
 @admin.register(ShoppingCartItem)
 class ShoppingCartItemAdmin(admin.ModelAdmin):
-    list_display = ('name', 'integrated', 'category', 'quantity', 'product_link',
-                    'supplier', 'brand', 'item_number', 'note', 'invoice_link',
-                    'storage_place', 'owner')
+
+    list_display = ('name', 'cart_purpose', 'integrated',
+                    'category', 'quantity', 'product_link',
+                    'supplier', 'brand', 'item_number',
+                    'note', 'invoice_link', 'storage_place',
+                    'owner')
     # search_fields = ['name']
 
+    def cart_purpose(self, obj):
+        # Return the "purpose" of the cart associated with the current ShoppingCartItem
+        return obj.cart.purpose
+
+    # Set a short description for the 'cart_purpose' method, which will be used as the column header in the list view
+    cart_purpose.short_description = 'Cart Purpose'
 
 @admin.register(Owner)
 class OwnerAdmin(admin.ModelAdmin):

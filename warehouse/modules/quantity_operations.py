@@ -27,7 +27,10 @@ class QuantityManager:
 
     @staticmethod
     def add_quantity(obj, income_quantity):
-        pass
+        quantity = obj.quantity + income_quantity
+        # income_quantity += obj.quantity
+        obj.quantity = quantity
+        obj.save()
 
     def get_total_quantity(obj):
         """
