@@ -213,10 +213,7 @@ class WriteOff(models.Model):
     order_time = models.TimeField(auto_now_add=True, blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
 
-    def clean(self):
-        # Check if the quantity in WriteOffItem exceeds the available quantity in ItemLocation
-        if self.quantity > self.item_location.quantity:
-            raise ValidationError('Quantity cannot exceed the available quantity.')
+
 
     def save(self, *args, **kwargs):
     #     #пишемо тут що відбувається коли статус замовлення змінено
@@ -236,6 +233,11 @@ class WriteOffItem(models.Model):
     item_location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE, related_name='write_off_items', help_text='Обираємо компонент для списання з конкретного місця')
     quantity = models.PositiveIntegerField(blank=False, default=1, help_text='Обираємо кількість компонентів для списання з конкретного місця. Якщо кількість буде '
                                                                              'перевищувати доступну - буде викликано exeption, щоб запобігти некоректній операції')
+
+    def clean(self):
+        # Check if the quantity in WriteOffItem exceeds the available quantity in ItemLocation
+        if self.quantity > self.item_location.quantity:
+            raise ValidationError('Quantity cannot exceed the available quantity.')
 
     def make_write_off(self):
         item_location = self.item_location
