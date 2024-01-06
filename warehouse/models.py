@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from .modules.quantity_operations import *
+from .modules.constants import *
 
 
 class ItemCategory(models.Model):
@@ -162,12 +163,12 @@ class ShoppingCartItem(models.Model):
     def create_item_location(self):
         item, item_created = Item.objects.get_or_create(name=self.name, category=self.category)
         if not self.owner:
-            owner, owner_created = Owner.objects.get_or_create(name='DEFIR')
+            owner, owner_created = Owner.objects.get_or_create(name=DEFAULT_COMPANY_NAME)
         else:
             owner = self.owner
 
         if not self.storage_place:
-            location, location_created = Location.objects.update_or_create(name='Склад')
+            location, location_created = Location.objects.update_or_create(name=DEFAULT_LOCATION)
         else:
             location = self.storage_place
         quantity = self.quantity
