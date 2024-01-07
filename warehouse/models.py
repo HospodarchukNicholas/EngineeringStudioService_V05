@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from .modules.quantity_operations import *
 from .modules.constants import *
 from .modules.populate_db import *
+from .modules.model_methods import *
 
 
 class ItemCategory(models.Model):
@@ -154,10 +155,6 @@ class ShoppingCart(models.Model):
                                    help_text='Це поле автоматично обирає активного користувача. При потребі можна обрати іншу відповідальну особу.')
 
     def save(self, *args, **kwargs):
-        #     #пишемо тут що відбувається коли статус замовлення змінено
-        #     is_update = False
-        #     if self.pk:
-        #         is_update = True
         super(ShoppingCart, self).save(*args, **kwargs)
         # обовязвоко оновлюємо всі cart_items щоб в їх def save виконались необхідні операції
         for cart_item in self.cart_items.all():
@@ -225,8 +222,8 @@ class ShoppingCartItem(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        unique_together = (('cart', 'name',),)
+    # class Meta:
+    #     unique_together = (('cart', 'name',),)
 
 
 class WriteOff(models.Model):
@@ -236,10 +233,6 @@ class WriteOff(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
 
     def save(self, *args, **kwargs):
-        #     #пишемо тут що відбувається коли статус замовлення змінено
-        #     is_update = False
-        #     if self.pk:
-        #         is_update = True
         super(WriteOff, self).save(*args, **kwargs)
         # обовязвоко оновлюємо всі cart_items щоб в їх def save виконались необхідні операції
         for write_off_item in self.write_off_items.all():
@@ -263,12 +256,8 @@ class WriteOffItem(models.Model):
             raise ValidationError('Quantity cannot exceed the available quantity.')
 
     def save(self, *args, **kwargs):
-        # перевіряємо чи об'єкт існує
-        is_update = False
-        if self.pk:
-            is_update = True
         super(WriteOffItem, self).save(*args, **kwargs)
-        if not is_update:
+        if not ModelMethods.is_update(self):
             success = QuantityManager.write_off(self.item_location, self.quantity)
             if not success:
                 # дублюється перевірка, але поки можливо залишити її, щоб відловити інші можливі сценарії
