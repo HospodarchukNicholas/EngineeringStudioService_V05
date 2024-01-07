@@ -138,21 +138,15 @@ class ShoppingCart(models.Model):
         ('completed', 'Completed'),
     ]
 
-    purpose = models.CharField(max_length=255, help_text='Необхідно коротко описати призначення '
-                                                         'даного замовлення.'
-                               )
+    purpose = models.CharField(max_length=255, help_text=HELP_TEXT_ShoppingCart_purpose)
     order_date = models.DateField(auto_now_add=True, blank=True)
     order_time = models.TimeField(auto_now_add=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft',
-                              help_text='Статус впливає як будуть оброблятись дані. Draft: це як шаблон, '
-                                        'програма створює записи для кожного компоненти та саму '
-                                        'корзину. Approved: замовлення сформовано але ще на етапі оформлення.'
-                                        ' Completed: всі компоненти доставленні, програма генерує для них записи,'
-                                        ' які відповідають реальному місцезнашодженню та кількості')
+                              help_text=HELP_TEXT_ShoppingCart_status)
     google_sheet_link = models.URLField(blank=True, max_length=255,
-                                        help_text='Якщо добавити посилання - програма спробує автоматично згенерувати всі компоненти та добавити в корзину')
+                                        help_text=HELP_TEXT_ShoppingCart_google_sheet_link)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
-                                   help_text='Це поле автоматично обирає активного користувача. При потребі можна обрати іншу відповідальну особу.')
+                                   help_text=HELP_TEXT_ShoppingCart_created_by)
 
     def save(self, *args, **kwargs):
         super(ShoppingCart, self).save(*args, **kwargs)
@@ -177,8 +171,10 @@ class ShoppingCartItem(models.Model):
     invoice_link = models.URLField(blank=True)
     storage_place = models.ForeignKey(Location, on_delete=models.CASCADE, blank=True, null=True)
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, blank=True, null=True)
+
+
     integrated = models.BooleanField(default=False,
-                                     editable=False)  # дозволяє відслідкувати чи вже було інтегровано в систему, тобто якщо батьківстьке замовлення було виконане
+                                     editable=False)
 
     def save(self, *args, **kwargs):
         super(ShoppingCartItem, self).save(*args, **kwargs)
@@ -206,17 +202,15 @@ class ShoppingCartItem(models.Model):
         )
 
         income_quantity = self.quantity
+
+        # Check if the ItemLocation was just created
         if item_location_created:
+            # If the ItemLocation was just created, set its quantity to the income quantity
             item_location.quantity = income_quantity
             item_location.save()
         elif not item_location_created:
+            # If the ItemLocation already existed, add the income quantity using the QuantityManager
             QuantityManager.add_quantity(item_location, income_quantity)
-            # добавляємо якщо запис вже існує
-
-            # quantity += item_location.quantity
-            # item_location.quantity = quantity
-            # item_location.save()
-
 
 
     def __str__(self):
@@ -224,6 +218,7 @@ class ShoppingCartItem(models.Model):
 
     # class Meta:
     #     unique_together = (('cart', 'name',),)
+    # потрібно визначити яка з комбінацій полів має право вважатись унікальною саме для ShoppingCartItem
 
 
 class WriteOff(models.Model):
