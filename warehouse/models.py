@@ -112,10 +112,10 @@ class Item(models.Model):
 
 class ItemLocation(models.Model):
     # warehouse_flow = models.ForeignKey(WarehouseFlow, on_delete=models.CASCADE)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='item_locations')
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(blank=False, default=0)
-    owner = models.ForeignKey(Owner, on_delete=models.CASCADE, blank=True)
+    owner = models.ForeignKey(Owner, on_delete=models.CASCADE, blank=False)
 
     class Meta:
         unique_together = (('item', 'location', 'owner',),)
@@ -125,7 +125,7 @@ class ItemLocation(models.Model):
         return ItemLocation.objects.filter(item=item).aggregate(Sum('quantity'))['quantity__sum']
 
     def __str__(self):
-        return f'Назва: {self.item}, Розташування: {self.location}, Кількість: {self.quantity}, Власник: {self.owner}'
+        return f'Назва компонента: {self.item}, Розташування: {self.location}, Кількість: {self.quantity}'
 
 
 class ShoppingCart(models.Model):

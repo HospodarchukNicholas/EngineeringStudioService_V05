@@ -1,3 +1,19 @@
+from django.apps import apps
+
+def get_app_name(model_instance):
+    """
+    Get the app name for a given model instance.
+
+    Args:
+        model_instance: An instance of a Django model.
+
+    Returns:
+        str: The app name for the model instance.
+    """
+    app_config = apps.get_containing_app_config(type(model_instance))
+    return app_config.name if app_config else None
+
+
 class ModelMethods:
     @staticmethod
     def is_update(obj):
@@ -17,3 +33,4 @@ class ModelMethods:
         if obj.pk:
             update = True
         return update
+
