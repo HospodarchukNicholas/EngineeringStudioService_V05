@@ -227,7 +227,7 @@ class ShoppingCartItem(models.Model):
 
 
 class WriteOff(models.Model):
-    reason = models.CharField(max_length=255, help_text='Коротко описуємо причину списання з балансу')
+    reason = models.CharField(max_length=255, help_text=HELP_TEXT_WriteOff_reason)
     order_date = models.DateField(auto_now_add=True, blank=True, null=True)
     order_time = models.TimeField(auto_now_add=True, blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
@@ -245,15 +245,14 @@ class WriteOff(models.Model):
 class WriteOffItem(models.Model):
     write_off = models.ForeignKey(WriteOff, on_delete=models.CASCADE, related_name='write_off_items', )
     item_location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE, related_name='write_off_items',
-                                      help_text='Обираємо компонент для списання з конкретного місця')
+                                      help_text=HELP_TEXT_WriteOffItem_item_location)
     quantity = models.PositiveIntegerField(blank=False, default=1,
-                                           help_text='Обираємо кількість компонентів для списання з конкретного місця. Якщо кількість буде '
-                                                     'перевищувати доступну - буде викликано exeption, щоб запобігти некоректній операції')
+                                           help_text=HELP_TEXT_WriteOffItem_quantity)
 
     def clean(self):
         # Check if the quantity in WriteOffItem exceeds the available quantity in ItemLocation
         if self.quantity > self.item_location.quantity:
-            raise ValidationError('Quantity cannot exceed the available quantity.')
+            raise ValidationError(QUANTITY_EXCEEDS_AVAILABLE_ERROR)
 
     def save(self, *args, **kwargs):
         super(WriteOffItem, self).save(*args, **kwargs)
@@ -261,7 +260,7 @@ class WriteOffItem(models.Model):
             success = QuantityManager.write_off(self.item_location, self.quantity)
             if not success:
                 # дублюється перевірка, але поки можливо залишити її, щоб відловити інші можливі сценарії
-                raise ValueError('Write-off quantity exceeds available quantity')
+                raise ValueError(QUANTITY_EXCEEDS_AVAILABLE_ERROR)
 
 
     def __str__(self):
