@@ -82,12 +82,42 @@ class GoogleSheets:
         """
         return worksheet.update(cells, values)
 
-    @staticmethod
-    def update_model_using_gs_link(model: classmethod,
-                                   data: pd.DataFrame) -> None:
-        for _, row in data.iterrows():
-            model(**row)
-            model.save()
-        return
+    # @staticmethod
+    # def update_model_using_gs_link(model: classmethod,
+    #                                data: pd.DataFrame) -> None:
+    #     for _, row in data.iterrows():
+    #         model(**row)
+    #         model.save()
+    #     return
 
+    def get_data_for_update(self,
+                            columns: Union[dict, list],
+                            non_empty_columns: Union[list, str, None] = None) -> list:
+        """Get data from google table in format list[dict]
 
+        Args:
+            columns Optional(dict, list): predefined columns to return. Use dict if renaming is required
+            non_empty_columns Optional(list, str, None): columns where values of them can't be empty
+
+        Returns:
+            list where each row represented as dict like {column: value, column2: value2, etc.}
+        """
+        data = self.get_sheet_values_by_link(self.get_worksheet('Аркуш1'), 1, 0)
+
+        if isinstance(columns, dict):
+            data = data.rename(columns=columns)
+            data = data[columns.values()]
+        else:
+            data = data[columns]
+
+        if isinstance(non_empty_columns, list):
+            for column in non_empty_columns:
+                data = data[data[column] != '']
+        elif isinstance(non_empty_columns, str):
+            data = data[data[non_empty_columns] != '']
+
+        # TEMP
+        data = data[data['quantity'] != '4,5']
+        #
+
+        return data.to_dict('records')

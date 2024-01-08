@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from .modules.google_sheets import GoogleSheets
 
 
 
@@ -109,6 +110,7 @@ class ShoppingCart(models.Model):
                                                          ' Completed: всі компоненти доставленні, програма генерує для них записи,'
                                                          ' які відповідають реальному місцезнашодженню та кількості')
     google_sheet_link = models.URLField(blank=True, max_length=255, help_text='Якщо добавити посилання - програма спробує автоматично згенерувати всі компоненти та добавити в корзину')
+    use_gs_link_to_fill_data = models.BooleanField(default=False)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, help_text='Це поле автоматично обирає активного користувача. При потребі можна обрати іншу відповідальну особу.')
 
     def save(self, *args, **kwargs):
@@ -117,15 +119,56 @@ class ShoppingCart(models.Model):
     #     if self.pk:
     #         is_update = True
         super(ShoppingCart, self).save(*args, **kwargs)
+        if self.use_gs_link_to_fill_data and self.google_sheet_link:
+            self.fill_from_gs()
+
         #обовязвоко оновлюємо всі cart_items щоб в їх def save виконались необхідні операції
         for cart_item in self.cart_items.all():
             cart_item.save()
 
+    def fill_from_gs(self):
+        gs = GoogleSheets(self.google_sheet_link)
+        data = gs.get_data_for_update(columns={
+            # "Тип": "category",
+            "Назва": 'name',
+            'Виробник': 'brand',
+            'Кіл-ть': 'quantity',
+            'ПІБ співробітника': 'owner',
+            'Робоча ділянка': 'storage_place',
+            'Примітка': 'note',
+            'Постачальник': 'supplier',
+            'Рахунок': 'invoice_link'
+        }, non_empty_columns=['category', 'name', 'quantity'])
+        # data = data[data['Тип'] != '']
+        # data = data[['Назва', 'Кіл-ть']]
+        # data = data.rename(columns={
+        #     'Назва': 'name',
+        #     'Кіл-ть': 'quantity'
+        # })
+        #
+        # data = data.drop_duplicates(subset='name')
+        # data = data[data['quantity'] != '4,5']
 
+        #########################
+
+        # ShoppingCartItem.objects.update_or_create(
+        #             cart_id=self.pk,
+        #             name=data['name'][5],
+        #             quantity=data['quantity'][5]
+        #     )
+
+        items = []
+        for row in data:
+            item = ShoppingCartItem(
+                    cart_id=self.pk,
+                    **row
+            )
+            items.append(item)
+
+        ShoppingCartItem.objects.bulk_create(items)
 
     def __str__(self):
         return f'Замовлення №{self.id}: {self.purpose}. Статус: {self.status}'
-
 
 class ShoppingCartItem(models.Model):
     cart = models.ForeignKey(ShoppingCart, on_delete=models.CASCADE, related_name='cart_items')
@@ -182,8 +225,8 @@ class ShoppingCartItem(models.Model):
     def __str__(self):
         return self.name
 
-    class Meta:
-        unique_together = (('cart', 'name',),)
+    # class Meta:
+    #     unique_together = (('cart', 'name',),)
 
 class WriteOff(models.Model):
     reason = models.CharField(max_length=255, help_text='Коротко описуємо причину списання з балансу')
