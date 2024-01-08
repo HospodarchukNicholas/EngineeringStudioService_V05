@@ -155,29 +155,12 @@ class ShoppingCart(models.Model):
             "Назва": 'name',
             'Виробник': 'brand',
             'Кіл-ть': 'quantity',
-            'ПІБ співробітника': 'owner',
-            'Робоча ділянка': 'storage_place',
+            # 'ПІБ співробітника': 'owner',
+            # 'Робоча ділянка': 'storage_place',
             'Примітка': 'note',
-            'Постачальник': 'supplier',
+            # 'Постачальник': 'supplier',
             'Рахунок': 'invoice_link'
-        }, non_empty_columns=['category', 'name', 'quantity'])
-        # data = data[data['Тип'] != '']
-        # data = data[['Назва', 'Кіл-ть']]
-        # data = data.rename(columns={
-        #     'Назва': 'name',
-        #     'Кіл-ть': 'quantity'
-        # })
-        #
-        # data = data.drop_duplicates(subset='name')
-        # data = data[data['quantity'] != '4,5']
-
-        #########################
-
-        # ShoppingCartItem.objects.update_or_create(
-        #             cart_id=self.pk,
-        #             name=data['name'][5],
-        #             quantity=data['quantity'][5]
-        #     )
+        }, non_empty_columns=['name', 'quantity'])
 
         items = []
         for row in data:
