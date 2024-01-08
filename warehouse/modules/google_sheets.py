@@ -97,7 +97,7 @@ class GoogleSheets:
 
         Args:
             columns Optional(dict, list): predefined columns to return. Use dict if renaming is required
-            non_empty_columns Optional(list, str, None): columns where values of them can't be empty
+            non_empty_columns Optional(list, str, None), default=None: columns where values of them can't be empty
 
         Returns:
             list where each row represented as dict like {column: value, column2: value2, etc.}
@@ -118,6 +118,5 @@ class GoogleSheets:
 
         # TEMP
         data = data[data['quantity'] != '4,5']
-        #
 
         return data.to_dict('records')
