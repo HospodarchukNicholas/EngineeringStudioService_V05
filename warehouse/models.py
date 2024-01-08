@@ -2,10 +2,40 @@ from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from .modules.google_sheets import GoogleSheets
+from django.utils.html import format_html, mark_safe
+from django.utils.html import format_html
 
+class ImageWizard:
 
+    @staticmethod
+    def image_tag(obj, width=250):
+        """
+        Generate an HTML image tag for the 'image' field.
+
+        Args:
+            obj: The model object with an 'image' field.
+            width (int): The desired width for the image (default is 250).
+
+        Returns:
+            str: An HTML image tag with the specified width and automatic height.
+                 If the object has no image, 'No preview image available' is displayed.
+        """
+        if obj.image:
+            return format_html('<img src="{}" width="{}" height="auto"/>'.format(obj.image.url, width))
+        else:
+            return 'No preview image available'
+
+class ItemCategory(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
 
 class Owner(models.Model):
+    """
+    Class Owner contain information about owner of something (item etc.)
+    """
     name = models.CharField(max_length=255, blank=False, unique=True)
     description = models.TextField(blank=True)
 
@@ -13,32 +43,34 @@ class Owner(models.Model):
         return self.name
 
 class Location(models.Model):
+    """
+    Physical or abstract location of Item (warehouse room, assembly of prototype etc.)
+    """
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
-    # посилання на свій же клас дозволяє зробити гнучку структуру фізичного розташування
+    # посилання на свій же клас ('self') дозволяє зробити гнучку структуру розташування item
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
 
 class Supplier(models.Model):
+    """
+    Class Supplier contain information about supplier of something (item etc.)
+    """
     name = models.CharField(max_length=255, blank=False)
     link = models.URLField(blank=True)
 
     def normalize_name(self):
-        # зберігаємо тільки Upper щоб уникнути дублювання даних
+        """
+        Зберігаємо тільки Upper щоб уникнути дублювання даних. Поки не працює, тому що коли створюємо
+        новий запис "бублик", django не проводить валідацію на перевірку, чи існує "БУБЛИК", бо шукає саме "бублик"
+        """
         self.name = self.name.lower()
 
     def save(self, *args, **kwargs):
         self.normalize_name()
         super(Supplier, self).save(*args, **kwargs)
-
-    def __str__(self):
-        return self.name
-
-class ItemCategory(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -55,21 +87,11 @@ class Item(models.Model):
     name = models.CharField(max_length=255, unique=True)
     category = models.ForeignKey(ItemCategory, on_delete=models.SET_NULL, blank=True, null=True)
     attributes = models.ManyToManyField(Attribute, blank=True)
+    image = models.ImageField(upload_to='item_images/', blank=True, null=True)
 
     def __str__(self):
         return self.name
 
-class Tool(Item):
-    description = models.CharField(max_length=255, unique=True)
-    default_category, default_category_created = ItemCategory.objects.update_or_create(name='Tool')
-
-    def save(self, *args, **kwargs):
-        if not self.category:
-            self.category = self.default_category
-        super().save(*args, **kwargs)
-
-    # def __str__(self):
-    #     return self.name
 
 class ItemLocation(models.Model):
     # warehouse_flow = models.ForeignKey(WarehouseFlow, on_delete=models.CASCADE)
@@ -234,10 +256,7 @@ class WriteOff(models.Model):
     order_time = models.TimeField(auto_now_add=True, blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
 
-    def clean(self):
-        # Check if the quantity in WriteOffItem exceeds the available quantity in ItemLocation
-        if self.quantity > self.item_location.quantity:
-            raise ValidationError('Quantity cannot exceed the available quantity.')
+
 
     def save(self, *args, **kwargs):
     #     #пишемо тут що відбувається коли статус замовлення змінено
@@ -257,6 +276,11 @@ class WriteOffItem(models.Model):
     item_location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE, related_name='write_off_items', help_text='Обираємо компонент для списання з конкретного місця')
     quantity = models.PositiveIntegerField(blank=False, default=1, help_text='Обираємо кількість компонентів для списання з конкретного місця. Якщо кількість буде '
                                                                              'перевищувати доступну - буде викликано exeption, щоб запобігти некоректній операції')
+
+    def clean(self):
+        # Check if the quantity in WriteOffItem exceeds the available quantity in ItemLocation
+        if self.quantity > self.item_location.quantity:
+            raise ValidationError('Quantity cannot exceed the available quantity.')
 
     def make_write_off(self):
         item_location = self.item_location
