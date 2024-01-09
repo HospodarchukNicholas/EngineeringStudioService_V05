@@ -1,29 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.utils.html import format_html, mark_safe
-from sorl.thumbnail import get_thumbnail
-from django.utils.html import format_html
 
-class ImageWizard:
-
-    @staticmethod
-    def image_tag(obj, width=250):
-        """
-        Generate an HTML image tag for the 'image' field.
-
-        Args:
-            obj: The model object with an 'image' field.
-            width (int): The desired width for the image (default is 250).
-
-        Returns:
-            str: An HTML image tag with the specified width and automatic height.
-                 If the object has no image, 'No preview image available' is displayed.
-        """
-        if obj.image:
-            return format_html('<img src="{}" width="{}" height="auto"/>'.format(obj.image.url, width))
-        else:
-            return 'No preview image available'
 
 class ItemCategory(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -31,6 +9,7 @@ class ItemCategory(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Owner(models.Model):
     """
@@ -41,6 +20,7 @@ class Owner(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Location(models.Model):
     """
@@ -53,6 +33,7 @@ class Location(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Supplier(models.Model):
     """
@@ -75,6 +56,7 @@ class Supplier(models.Model):
     def __str__(self):
         return self.name
 
+
 class Attribute(models.Model):
     # для моделі GeneralItem створюємо необмежену зількість додаткових полів
     name = models.CharField(max_length=255)
@@ -82,6 +64,7 @@ class Attribute(models.Model):
 
     def __str__(self):
         return f'{self.name}: {self.value}'
+
 
 class Item(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -110,8 +93,8 @@ class ItemLocation(models.Model):
     def __str__(self):
         return f'Назва: {self.item}, Розташування: {self.location}, Кількість: {self.quantity}, Власник: {self.owner}'
 
-class ShoppingCart(models.Model):
 
+class ShoppingCart(models.Model):
     STATUS_CHOICES = [
         ('draft', 'Draft'),
         # ('submitted', 'Submitted'),
@@ -123,28 +106,29 @@ class ShoppingCart(models.Model):
 
     purpose = models.CharField(max_length=255, help_text='Необхідно коротко описати призначення '
                                                          'даного замовлення.'
-                                                         )
+                               )
     order_date = models.DateField(auto_now_add=True, blank=True)
     order_time = models.TimeField(auto_now_add=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', help_text='Статус впливає як будуть оброблятись дані. Draft: це як шаблон, '
-                                                         'програма створює записи для кожного компоненти та саму '
-                                                         'корзину. Approved: замовлення сформовано але ще на етапі оформлення.'
-                                                         ' Completed: всі компоненти доставленні, програма генерує для них записи,'
-                                                         ' які відповідають реальному місцезнашодженню та кількості')
-    google_sheet_link = models.URLField(blank=True, max_length=255, help_text='Якщо добавити посилання - програма спробує автоматично згенерувати всі компоненти та добавити в корзину')
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, help_text='Це поле автоматично обирає активного користувача. При потребі можна обрати іншу відповідальну особу.')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft',
+                              help_text='Статус впливає як будуть оброблятись дані. Draft: це як шаблон, '
+                                        'програма створює записи для кожного компоненти та саму '
+                                        'корзину. Approved: замовлення сформовано але ще на етапі оформлення.'
+                                        ' Completed: всі компоненти доставленні, програма генерує для них записи,'
+                                        ' які відповідають реальному місцезнашодженню та кількості')
+    google_sheet_link = models.URLField(blank=True, max_length=255,
+                                        help_text='Якщо добавити посилання - програма спробує автоматично згенерувати всі компоненти та добавити в корзину')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True,
+                                   help_text='Це поле автоматично обирає активного користувача. При потребі можна обрати іншу відповідальну особу.')
 
     def save(self, *args, **kwargs):
-    #     #пишемо тут що відбувається коли статус замовлення змінено
-    #     is_update = False
-    #     if self.pk:
-    #         is_update = True
+        #     #пишемо тут що відбувається коли статус замовлення змінено
+        #     is_update = False
+        #     if self.pk:
+        #         is_update = True
         super(ShoppingCart, self).save(*args, **kwargs)
-        #обовязвоко оновлюємо всі cart_items щоб в їх def save виконались необхідні операції
+        # обовязвоко оновлюємо всі cart_items щоб в їх def save виконались необхідні операції
         for cart_item in self.cart_items.all():
             cart_item.save()
-
-
 
     def __str__(self):
         return f'Замовлення №{self.id}: {self.purpose}. Статус: {self.status}'
@@ -163,12 +147,13 @@ class ShoppingCartItem(models.Model):
     invoice_link = models.URLField(blank=True)
     storage_place = models.ForeignKey(Location, on_delete=models.CASCADE, blank=True, null=True)
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, blank=True, null=True)
-    integrated = models.BooleanField(default=False, editable=False) #дозволяє відслідкувати чи вже було інтегровано в систему, тобто якщо батьківстьке замовлення було виконане
+    integrated = models.BooleanField(default=False,
+                                     editable=False)  # дозволяє відслідкувати чи вже було інтегровано в систему, тобто якщо батьківстьке замовлення було виконане
 
     def save(self, *args, **kwargs):
         super(ShoppingCartItem, self).save(*args, **kwargs)
         if self.cart.status == 'completed' and not self.integrated:
-            #якщо ShoppingCartItem вже було інтегровано в систему, повторно це не робимо
+            # якщо ShoppingCartItem вже було інтегровано в систему, повторно це не робимо
             self.create_item_location()
             # self.integrated = True
             ShoppingCartItem.objects.filter(pk=self.pk).update(integrated=True)
@@ -195,12 +180,10 @@ class ShoppingCartItem(models.Model):
             item_location.quantity = quantity
             item_location.save()
         elif not item_location_created:
-            #добавляємо якщо запис вже існує
+            # добавляємо якщо запис вже існує
             quantity += item_location.quantity
             item_location.quantity = quantity
             item_location.save()
-
-
 
     def __str__(self):
         return self.name
@@ -208,35 +191,39 @@ class ShoppingCartItem(models.Model):
     class Meta:
         unique_together = (('cart', 'name',),)
 
+
 class WriteOff(models.Model):
     reason = models.CharField(max_length=255, help_text='Коротко описуємо причину списання з балансу')
     order_date = models.DateField(auto_now_add=True, blank=True, null=True)
     order_time = models.TimeField(auto_now_add=True, blank=True, null=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
 
-    def clean(self):
-        # Check if the quantity in WriteOffItem exceeds the available quantity in ItemLocation
-        if self.quantity > self.item_location.quantity:
-            raise ValidationError('Quantity cannot exceed the available quantity.')
-
     def save(self, *args, **kwargs):
-    #     #пишемо тут що відбувається коли статус замовлення змінено
-    #     is_update = False
-    #     if self.pk:
-    #         is_update = True
+        #     #пишемо тут що відбувається коли статус замовлення змінено
+        #     is_update = False
+        #     if self.pk:
+        #         is_update = True
         super(WriteOff, self).save(*args, **kwargs)
-        #обовязвоко оновлюємо всі cart_items щоб в їх def save виконались необхідні операції
+        # обовязвоко оновлюємо всі cart_items щоб в їх def save виконались необхідні операції
         for write_off_item in self.write_off_items.all():
             write_off_item.save()
 
     def __str__(self):
         return self.reason
 
+
 class WriteOffItem(models.Model):
     write_off = models.ForeignKey(WriteOff, on_delete=models.CASCADE, related_name='write_off_items', )
-    item_location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE, related_name='write_off_items', help_text='Обираємо компонент для списання з конкретного місця')
-    quantity = models.PositiveIntegerField(blank=False, default=1, help_text='Обираємо кількість компонентів для списання з конкретного місця. Якщо кількість буде '
-                                                                             'перевищувати доступну - буде викликано exeption, щоб запобігти некоректній операції')
+    item_location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE, related_name='write_off_items',
+                                      help_text='Обираємо компонент для списання з конкретного місця')
+    quantity = models.PositiveIntegerField(blank=False, default=1,
+                                           help_text='Обираємо кількість компонентів для списання з конкретного місця. Якщо кількість буде '
+                                                     'перевищувати доступну - буде викликано exeption, щоб запобігти некоректній операції')
+
+    def clean(self):
+        # Check if the quantity in WriteOffItem exceeds the available quantity in ItemLocation
+        if self.quantity > self.item_location.quantity:
+            raise ValidationError('Quantity cannot exceed the available quantity.')
 
     def make_write_off(self):
         item_location = self.item_location
@@ -256,12 +243,12 @@ class WriteOffItem(models.Model):
         if not is_update:
             self.make_write_off()
 
-
     def __str__(self):
         return self.item_location.item.name
 
+
 def create_objects():
-    #автозаповнення бази даних
+    # автозаповнення бази даних
 
     ItemCategory.objects.update_or_create(name='Laptop')
     ItemCategory.objects.update_or_create(name='Mechanical')
@@ -294,6 +281,5 @@ def clean_db():
     ShoppingCart.objects.all().delete()
     ItemLocation.objects.all().delete()
 
-
-#clean_db()
-#create_objects()
+# clean_db()
+# create_objects()

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import *
-from django.utils.html import format_html, mark_safe
+from .modules.images import *
 
 VERSION = 'v0.5'
 COMPANY_NAME = 'Defir'
