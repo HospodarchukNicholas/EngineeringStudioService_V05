@@ -142,9 +142,8 @@ class ShoppingCart(models.Model):
     order_date = models.DateField(auto_now_add=True, blank=True)
     order_time = models.TimeField(auto_now_add=True, blank=True)
 
-    google_sheet_link = models.URLField(blank=True, max_length=255, help_text='Якщо добавити посилання - програма спробує автоматично згенерувати всі компоненти та добавити в корзину')
+
     use_gs_link_to_fill_data = models.BooleanField(default=False)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, help_text='Це поле автоматично обирає активного користувача. При потребі можна обрати іншу відповідальну особу.')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft',
                               help_text=HELP_TEXT_ShoppingCart_status)
     google_sheet_link = models.URLField(blank=True, max_length=255,
