@@ -93,7 +93,7 @@ class Item(models.Model):
 
 class ItemLocation(models.Model):
     # warehouse_flow = models.ForeignKey(WarehouseFlow, on_delete=models.CASCADE)
-    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='item_locations')
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(blank=False, default=0)
     owner = models.ForeignKey(Owner, on_delete=models.CASCADE, blank=True)
