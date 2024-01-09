@@ -110,7 +110,6 @@ class Item(models.Model):
     def __str__(self):
         return self.name
 
-
 class ItemLocation(models.Model):
     # warehouse_flow = models.ForeignKey(WarehouseFlow, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='item_locations')
